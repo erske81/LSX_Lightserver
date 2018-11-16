@@ -1,4 +1,12 @@
-import socketserver, threading, time
+import socketserver, threading, time, configparser, logging
+
+# create logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='light.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+config = configparser.ConfigParser()
+config.read('settings.ini')
+serversettings = config['server']
 
 
 class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
@@ -17,16 +25,15 @@ class ThreadedUDPServer(socketserver.ThreadingMixIn, socketserver.UDPServer):
 
 if __name__ == "__main__":
 
-    HOST, PORT = "127.0.0.1", 5005
-
-    server = ThreadedUDPServer((HOST, PORT), ThreadedUDPRequestHandler)
+    server = ThreadedUDPServer((serversettings['host'], int(serversettings['port'])), ThreadedUDPRequestHandler)
 
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
 
     try:
         server_thread.start()
-        print("Server started at {} port {}".format(HOST, PORT))
+        print("Server started at {} port {}".format(serversettings['host'], serversettings['port']))
+        logging.info('Server listening at %s on port %s', serversettings['host'], serversettings['port'])
         while True: time.sleep(100)
     except (KeyboardInterrupt, SystemExit):
         server.shutdown()
