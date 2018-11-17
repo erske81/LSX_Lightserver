@@ -1,4 +1,4 @@
-import socketserver, threading, time, configparser, logging
+import socketserver, threading, time, configparser, logging, mysql
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -31,9 +31,12 @@ if __name__ == "__main__":
     server_thread.daemon = True
 
     try:
+
         server_thread.start()
         print("Server started at {} port {}".format(serversettings['host'], serversettings['port']))
         logging.info('Server listening at %s on port %s', serversettings['host'], serversettings['port'])
+        mysql.UpdateSwitchLightTime("10.0.0.1","125","467","165","20181018")
+
         while True: time.sleep(100)
     except (KeyboardInterrupt, SystemExit):
         server.shutdown()
